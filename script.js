@@ -2,14 +2,27 @@
 // covered
 // flagged
 // 0 = blank, 1 = mine...
+// easy 9x9 10
+// mid 16x16 40
+// hard 30x16 99
+
 
 var boardElem = document.getElementById("board");
 var numberOfFlagsElem = document.getElementById("flags");
-var numberOfMines = 99;
-var numberOfFlags = 99;
+var gameState = document.getElementById("game-state");
+var numberOfMines = 40;
+var numberOfFlags = 40;
 var rows = 16;
-var columns = 30;
+var columns = 16;
 var board = generateBoard();
+var firstClick = true;
+
+console.log("numberOfFlags.length: ", numberOfFlags.toString().length);
+if (numberOfFlags.toString().length < 3) {
+    for (var i = 0; i <= 3 - numberOfFlags.toString().length; i++) {
+        numberOfFlags = "0" + numberOfFlags;
+    }
+}
 
 numberOfFlagsElem.innerHTML = numberOfFlags;
 
@@ -25,27 +38,81 @@ boardElem.addEventListener("contextmenu", function (e) {
     if (board[rowIndex][colIndex].state === "covered" && numberOfFlags > 0) {
         console.log("add flag");
         e.target.classList.add("flagged");
+        e.target.innerText = "🏁";
         board[rowIndex][colIndex].state = "flagged";
         numberOfFlags--;
     } else if (board[rowIndex][colIndex].state === "flagged") {
         console.log("remove flag");
         e.target.classList.remove("flagged");
+        e.target.innerText = "";
         board[rowIndex][colIndex].state = "covered";
         numberOfFlags++;
     }
+    console.log("numberOfFlags.length: ", numberOfFlags.toString().length);
+    if (numberOfFlags.toString().length < 3) {
+        for (var i = 0; i <= 3 - numberOfFlags.toString().length; i++) {
+            numberOfFlags = "0" + numberOfFlags;
+        }
+    }
     numberOfFlagsElem.innerHTML = numberOfFlags;
     console.log("right click");
+    if (checkForVictory()) {
+        console.log("victory!!!");
+    }
 });
 
 boardElem.addEventListener("click", function (e) {
+    console.log("e.target: ", e.target);
     var colIndex = getColIndex(e.target);
     var rowIndex = getRowIndex(e.target);
     if (board[rowIndex][colIndex].value) {
+        if (firstClick) {
+            console.log("first click");
+            swapMineWithBlank(colIndex, rowIndex);
+            uncoverSpace(getCellByRowAndCol(rowIndex, colIndex), rowIndex, colIndex);
+        }
         e.target.classList.add("mine");
+        e.target.innerText = "💣";
+        gameState.innerText = "😞";
     } else {
         uncoverSpace(e.target, rowIndex, colIndex);
     }
+    firstClick = false;
+    if (checkForVictory()) {
+        console.log("victory!!!");
+    }
 });
+
+function checkForVictory() {
+    var numberOfUncoveredSpaces = board.flat().filter(function (cell) {
+        return cell.state === "uncovered" || cell.state === "flagged";
+    });
+    return numberOfUncoveredSpaces.length === rows * columns;
+}
+
+function getCellByRowAndCol(rowIndex, colIndex) {
+    return document.getElementsByClassName("row")[rowIndex].children[colIndex];
+}
+
+function swapMineWithBlank(colIndex, rowIndex) {
+    console.log("board[rowIndex][colIndex].value: ", board[rowIndex][colIndex].value);
+    board[rowIndex][colIndex].value = 0;
+    var randomRow, randomCol;
+    var foundNewPlaceForMine = false;
+    while (!foundNewPlaceForMine) {
+        randomRow = Math.floor(Math.random() * rows);
+        randomCol = Math.floor(Math.random() * columns);
+        console.log("randomRow, randomCol: ", randomRow, randomCol);
+        if (board[randomRow][randomCol].value === 0) {
+            console.log("changing the following to mine", board[randomRow][randomCol]);
+            board[randomRow][randomCol].value = 1;
+            foundNewPlaceForMine = true;
+        }
+    }
+    board = addNeighbourNumbers(board);
+    boardHtml = generateBoardHtml(board);
+    boardElem.innerHTML = boardHtml;
+}
 
 function uncoverSpace(elem, rowIndex, colIndex) {
     if (elem.classList.contains("uncovered")) {
@@ -59,9 +126,10 @@ function uncoverSpace(elem, rowIndex, colIndex) {
     } else {
         var cells = getAdjacentCells(rowIndex, colIndex);
         cells.forEach(function (cell) {
-            var newElem = document.getElementsByClassName("row")[cell.row].children[cell.col];
+            var newElem = getCellByRowAndCol(cell.row, cell.col);
             if (cell.numberOfNeighbours) {
                 newElem.classList.add("uncovered");
+                cell.state = "uncovered";
                 newElem.innerText = cell.numberOfNeighbours;
             } else {
                 uncoverSpace(newElem, cell.row, cell.col);
@@ -99,7 +167,7 @@ function getAdjacentCells(rowIndex, colIndex) {
     board[rowIndex][colIndex + 1] && adjacentCells.push(board[rowIndex][colIndex + 1]);
     board[rowIndex][colIndex - 1] && adjacentCells.push(board[rowIndex][colIndex - 1]);
     adjacentCells = adjacentCells.filter(function (cell) {
-        return cell.state === "covered"
+        return cell.state === "covered";
     });
     return adjacentCells;
 }

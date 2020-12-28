@@ -1,17 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minesweeper</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <h1>Minesweeper</h1>
-    <div>Number of flags remaining: 
-        <span id="flags"></span>
-    </div>
-    <div id="board"></div>
-    <script src="script.js"></script>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Minesweeper</title>
+        <link rel="stylesheet" href="style.css" />
+    </head>
+    <body>
+        <main>
+            <div class="container">
+                <div class="board-conatiner">
+                    <header>
+                        <span id="flags">0</span>
+                        <span id="game-state">😊</span>
+                        <span id="timer">000</span>
+                        
+    
+                    </header>
+                    <div id="board"></div>
+
+                </div>
+            </div>
+        </main>
+        <script src="script.js"></script>
+    </body>
 </html>
