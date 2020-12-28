@@ -14,6 +14,7 @@ var board = generateBoard();
 numberOfFlagsElem.innerHTML = numberOfFlags;
 
 board = addMinesToRandomSlots(board);
+board = addNeighbourNumbers(board);
 var boardHtml = generateBoardHtml(board);
 boardElem.innerHTML = boardHtml;
 
@@ -49,6 +50,41 @@ boardElem.addEventListener("click", function (e) {
     }
     console.log("board[rowIndex][colIndex]: ", board[rowIndex][colIndex]);
 });
+
+function addNeighbourNumbers(board) {
+    board = board.map(function (row, rowIndex) {
+        return row.map(function (cell, colIndex) {
+            return {
+                ...cell,
+                numberOfNeighbours: getNearestNeighbours(rowIndex, colIndex)
+            };
+        }); 
+    });
+    return board;
+}
+
+function getNearestNeighbours(rowIndex, colIndex) {
+    var numberOfNeighbours = 0;
+    var rowAbove = board[rowIndex - 1];
+    if (rowAbove) {
+        checkForMine(rowAbove, colIndex) && numberOfNeighbours++;
+        checkForMine(rowAbove, colIndex + 1) && numberOfNeighbours++;
+        checkForMine(rowAbove, colIndex - 1) && numberOfNeighbours++;
+    }
+    var rowBelow = board[rowIndex + 1];
+    if (rowBelow) {
+        checkForMine(rowBelow, colIndex) && numberOfNeighbours++;
+        checkForMine(rowBelow, colIndex + 1) && numberOfNeighbours++;
+        checkForMine(rowBelow, colIndex - 1) && numberOfNeighbours++;
+    }
+    checkForMine(board[rowIndex], colIndex + 1) && numberOfNeighbours++;
+    checkForMine(board[rowIndex], colIndex - 1) && numberOfNeighbours++;
+    return numberOfNeighbours;
+}
+
+function checkForMine(row, colIndex) {
+    return row[colIndex] && row[colIndex].value;
+}
 
 function getColIndex(el) {
     var row = el.parentElement.children;
