@@ -6,74 +6,73 @@
 // mid 16x16 40
 // hard 30x16 99
 
-
 var boardElem = document.getElementById("board");
 var numberOfFlagsElem = document.getElementById("flags");
 var gameState = document.getElementById("game-state");
-var numberOfMines = 40;
-var numberOfFlags = 40;
+var numberOfMines = 99;
+var numberOfFlags = 99;
 var rows = 16;
-var columns = 16;
-var board = generateBoard();
-var firstClick = true;
+var columns = 30;
+var board, boardHtml, gameLost, firstClick;
 
-console.log("numberOfFlags.length: ", numberOfFlags.toString().length);
-if (numberOfFlags.toString().length < 3) {
-    for (var i = 0; i <= 3 - numberOfFlags.toString().length; i++) {
-        numberOfFlags = "0" + numberOfFlags;
-    }
+startGame();
+
+function startGame() {
+    board = generateBoard();
+    board = addMinesToRandomSlots(board);
+    board = addNeighbourNumbers(board);
+    boardHtml = generateBoardHtml(board);
+    boardElem.innerHTML = boardHtml;
+    numberOfFlags = addZerosToNumber(numberOfFlags);
+    numberOfFlagsElem.innerHTML = numberOfFlags;
+    gameLost = false;
+    gameState.innerText = "😊";
+    firstClick = true;
 }
 
-numberOfFlagsElem.innerHTML = numberOfFlags;
-
-board = addMinesToRandomSlots(board);
-board = addNeighbourNumbers(board);
-var boardHtml = generateBoardHtml(board);
-boardElem.innerHTML = boardHtml;
+gameState.addEventListener("click", restartGame);
 
 boardElem.addEventListener("contextmenu", function (e) {
     e.preventDefault();
+    if (gameLost) {
+        return;
+    }
     var colIndex = getColIndex(e.target);
     var rowIndex = getRowIndex(e.target);
     if (board[rowIndex][colIndex].state === "covered" && numberOfFlags > 0) {
-        console.log("add flag");
         e.target.classList.add("flagged");
         e.target.innerText = "🏁";
         board[rowIndex][colIndex].state = "flagged";
         numberOfFlags--;
     } else if (board[rowIndex][colIndex].state === "flagged") {
-        console.log("remove flag");
         e.target.classList.remove("flagged");
         e.target.innerText = "";
         board[rowIndex][colIndex].state = "covered";
         numberOfFlags++;
     }
-    console.log("numberOfFlags.length: ", numberOfFlags.toString().length);
-    if (numberOfFlags.toString().length < 3) {
-        for (var i = 0; i <= 3 - numberOfFlags.toString().length; i++) {
-            numberOfFlags = "0" + numberOfFlags;
-        }
-    }
+    numberOfFlags = addZerosToNumber(numberOfFlags);
     numberOfFlagsElem.innerHTML = numberOfFlags;
-    console.log("right click");
     if (checkForVictory()) {
         console.log("victory!!!");
     }
 });
 
 boardElem.addEventListener("click", function (e) {
-    console.log("e.target: ", e.target);
+    if (gameLost) {
+        return;
+    }
     var colIndex = getColIndex(e.target);
     var rowIndex = getRowIndex(e.target);
     if (board[rowIndex][colIndex].value) {
         if (firstClick) {
-            console.log("first click");
             swapMineWithBlank(colIndex, rowIndex);
             uncoverSpace(getCellByRowAndCol(rowIndex, colIndex), rowIndex, colIndex);
+        } else {
+            e.target.classList.add("mine");
+            e.target.innerText = "💣";
+            gameState.innerText = "😞";
+            gameLost = true;
         }
-        e.target.classList.add("mine");
-        e.target.innerText = "💣";
-        gameState.innerText = "😞";
     } else {
         uncoverSpace(e.target, rowIndex, colIndex);
     }
@@ -82,6 +81,20 @@ boardElem.addEventListener("click", function (e) {
         console.log("victory!!!");
     }
 });
+
+function restartGame() {
+    numberOfFlags = numberOfMines;
+    startGame();
+}
+
+function addZerosToNumber(num) {
+    if (num.toString().length < 3) {
+        for (var i = 0; i <= 3 - num.toString().length; i++) {
+            num = "0" + num;
+        }
+    }
+    return num;
+}
 
 function checkForVictory() {
     var numberOfUncoveredSpaces = board.flat().filter(function (cell) {
@@ -213,7 +226,6 @@ function generateBoardHtml(board) {
         row = board[i];
         htmlString += "<div class='row'>";
         for (var j = 0; j < row.length; j++) {
-            // htmlString += "<div>" + row[j].value + "</div>";
             htmlString += "<div></div>";
         }
         htmlString += "</div>";
@@ -275,4 +287,3 @@ function generateBoard() {
     return board;
 }
 
-console.log("board: ", board);

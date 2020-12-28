@@ -3,6 +3,13 @@
     margin: 0;
 }
 
+main {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: #2e016d;
+}
+
 header {
     font-size: 48px;
     display: flex;
@@ -26,22 +33,24 @@ header {
 .row div {
     height: 30px;
     width: 30px;
-    /* margin: 2px; */
-    background-color: aqua;
-    border: solid 1px black;
+    background-color: #7fd9e2;
+    border-right: solid 4px #2e016d;
+    border-bottom: solid 4px #2e016d;
+    border-top: solid 4px white;
+    border-left: solid 4px white;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .row .mine {
-    background-color: red;
+    background-color:#ffadb9;
 }
 
 .row .uncovered {
-    background-color: gainsboro;
+    background-color: white;
 }
 
 .row .flagged {
-    background-color: green;
+    background-color: #ffadb9;
 }
