@@ -3,6 +3,34 @@
     margin: 0;
 }
 
+.hidden {
+    visibility: hidden;
+}
+
+.none {
+    display: none;
+}
+
+.game-selection {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.mode {
+    cursor: pointer;
+    margin: 24px 0;
+}
+
+.mode:hover {
+    font-weight: 800;
+}
+
+#game-state {
+    cursor: pointer;
+}
+
 main {
     font-family: "IBM Plex Mono", monospace;
     font-size: 18px;

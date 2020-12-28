@@ -9,25 +9,44 @@
 var boardElem = document.getElementById("board");
 var numberOfFlagsElem = document.getElementById("flags");
 var gameState = document.getElementById("game-state");
-var numberOfMines = 99;
-var numberOfFlags = 99;
-var rows = 16;
-var columns = 30;
-var board, boardHtml, gameLost, firstClick;
+var beginner = document.getElementById("beginner");
+var intermediate = document.getElementById("intermediate");
+var expert = document.getElementById("expert");
+var gameSelection = document.querySelector(".game-selection");
+var container = document.querySelector(".container");
+var board, boardHtml, gameLost, firstClick, numberOfMines, numberOfFlags, rows, columns;
 
-startGame();
+beginner.addEventListener("click", function () {
+    startGame(9, 9, 10);
+});
 
-function startGame() {
-    board = generateBoard();
+intermediate.addEventListener("click", function () {
+    startGame(16, 16, 40);
+});
+
+expert.addEventListener("click", function () {
+    startGame(16, 30, 99);
+});
+
+
+function startGame(r, c, mines) {
+    numberOfMines = mines;
+    numberOfFlags = mines;
+    rows = r;
+    columns = c;
+    board = generateBoard(rows, columns);
     board = addMinesToRandomSlots(board);
     board = addNeighbourNumbers(board);
     boardHtml = generateBoardHtml(board);
+    console.log('board: ',board);
     boardElem.innerHTML = boardHtml;
     numberOfFlags = addZerosToNumber(numberOfFlags);
     numberOfFlagsElem.innerHTML = numberOfFlags;
     gameLost = false;
-    gameState.innerText = "😊";
     firstClick = true;
+    gameState.innerText = "😊";
+    gameSelection.classList.add("none");
+    container.classList.remove("hidden");
 }
 
 gameState.addEventListener("click", restartGame);
@@ -84,7 +103,7 @@ boardElem.addEventListener("click", function (e) {
 
 function restartGame() {
     numberOfFlags = numberOfMines;
-    startGame();
+    startGame(rows, columns, numberOfMines);
 }
 
 function addZerosToNumber(num) {
@@ -266,7 +285,7 @@ function generateRandomIndexes() {
     return arr;
 }
 
-function generateBoard() {
+function generateBoard(rows, columns) {
     var board = [];
     var index = 0;
     for (var row, i = 0; i < rows; i++) {
