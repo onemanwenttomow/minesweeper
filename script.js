@@ -33,23 +33,42 @@ boardElem.addEventListener("contextmenu", function (e) {
         board[rowIndex][colIndex].state = "covered";
         numberOfFlags++;
     }
-    numberOfFlagsElem.innerHTML = numberOfFlags
+    numberOfFlagsElem.innerHTML = numberOfFlags;
     console.log("right click");
 });
 
 boardElem.addEventListener("click", function (e) {
     var colIndex = getColIndex(e.target);
-    var rowIndex = getRowIndex(e.target)
-    console.log("e.target.classList: ", e.target.classList);
+    var rowIndex = getRowIndex(e.target);
     if (board[rowIndex][colIndex].value) {
-        console.log("MINE!!!!!!");
         e.target.classList.add("mine");
     } else {
-        e.target.classList.add("uncovered");
-        board[rowIndex][colIndex].state = "uncovered";
+        uncoverSpace(e.target, rowIndex, colIndex);
     }
-    console.log("board[rowIndex][colIndex]: ", board[rowIndex][colIndex]);
 });
+
+function uncoverSpace(elem, rowIndex, colIndex) {
+    elem.classList.add("uncovered");
+    var numNeighbours = Number(board[rowIndex][colIndex].numberOfNeighbours);
+    if (numNeighbours) {
+        elem.innerText = numNeighbours;
+    } else {
+        console.log("RECURSION!");
+        var cells = getAdjacentCells(rowIndex, colIndex);
+        console.log('cells: ', cells);
+        cells.forEach(function (cell) {
+            console.log("cell: ", cell);
+            var elemToChange = document.getElementsByClassName("row")[cell.row].children[cell.col];
+            if (!cell.numberOfNeighbours) {
+                elemToChange.classList.add("uncovered");
+            } else {
+                console.log('elemToChange: ',elemToChange);
+                uncoverSpace(elemToChange, cell.row, cell.col)
+            }
+        });
+    }
+    board[rowIndex][colIndex].state = "uncovered";
+}
 
 function addNeighbourNumbers(board) {
     board = board.map(function (row, rowIndex) {
@@ -58,9 +77,31 @@ function addNeighbourNumbers(board) {
                 ...cell,
                 numberOfNeighbours: getNearestNeighbours(rowIndex, colIndex)
             };
-        }); 
+        });
     });
     return board;
+}
+
+function getAdjacentCells(rowIndex, colIndex) {
+    var adjacentCells = [];
+    var rowAbove = board[rowIndex - 1];
+    if (rowAbove) {
+        adjacentCells.push(rowAbove[colIndex]);
+        rowAbove[colIndex + 1] && adjacentCells.push(rowAbove[colIndex + 1]);
+        rowAbove[colIndex - 1] && adjacentCells.push(rowAbove[colIndex - 1]);
+    }
+    var rowBelow = board[rowIndex + 1];
+    if (rowBelow) {
+        adjacentCells.push(rowBelow[colIndex]);
+        rowBelow[colIndex + 1] && adjacentCells.push(rowBelow[colIndex + 1]);
+        rowBelow[colIndex - 1] && adjacentCells.push(rowBelow[colIndex - 1]);
+    }
+    board[rowIndex][colIndex + 1] && adjacentCells.push(board[rowIndex][colIndex + 1]);
+    board[rowIndex][colIndex - 1] && adjacentCells.push(board[rowIndex][colIndex - 1]);
+    adjacentCells = adjacentCells.filter(function (cell) {
+        return cell.state === "covered"
+    });
+    return adjacentCells;
 }
 
 function getNearestNeighbours(rowIndex, colIndex) {
@@ -155,7 +196,9 @@ function generateBoard() {
                 state: "covered",
                 value: 0,
                 numberOfNeighbours: 0,
-                index: index
+                index: index,
+                row: i,
+                col: j
             });
             index++;
         }
