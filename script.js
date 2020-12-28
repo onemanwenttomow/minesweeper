@@ -5,10 +5,10 @@
 
 var boardElem = document.getElementById("board");
 var numberOfFlagsElem = document.getElementById("flags");
-var numberOfMines = 10;
-var numberOfFlags = 10;
-var rows = 9;
-var columns = 9;
+var numberOfMines = 99;
+var numberOfFlags = 99;
+var rows = 16;
+var columns = 30;
 var board = generateBoard();
 
 numberOfFlagsElem.innerHTML = numberOfFlags;
@@ -48,26 +48,26 @@ boardElem.addEventListener("click", function (e) {
 });
 
 function uncoverSpace(elem, rowIndex, colIndex) {
+    if (elem.classList.contains("uncovered")) {
+        return;
+    }
     elem.classList.add("uncovered");
+    board[rowIndex][colIndex].state = "uncovered";
     var numNeighbours = Number(board[rowIndex][colIndex].numberOfNeighbours);
-    if (numNeighbours) {
+    if (numNeighbours > 0) {
         elem.innerText = numNeighbours;
     } else {
-        console.log("RECURSION!");
         var cells = getAdjacentCells(rowIndex, colIndex);
-        console.log('cells: ', cells);
         cells.forEach(function (cell) {
-            console.log("cell: ", cell);
-            var elemToChange = document.getElementsByClassName("row")[cell.row].children[cell.col];
-            if (!cell.numberOfNeighbours) {
-                elemToChange.classList.add("uncovered");
+            var newElem = document.getElementsByClassName("row")[cell.row].children[cell.col];
+            if (cell.numberOfNeighbours) {
+                newElem.classList.add("uncovered");
+                newElem.innerText = cell.numberOfNeighbours;
             } else {
-                console.log('elemToChange: ',elemToChange);
-                uncoverSpace(elemToChange, cell.row, cell.col)
+                uncoverSpace(newElem, cell.row, cell.col);
             }
         });
     }
-    board[rowIndex][colIndex].state = "uncovered";
 }
 
 function addNeighbourNumbers(board) {
