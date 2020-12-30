@@ -14,7 +14,17 @@ var intermediate = document.getElementById("intermediate");
 var expert = document.getElementById("expert");
 var gameSelection = document.querySelector(".game-selection");
 var container = document.querySelector(".container");
-var board, boardHtml, gameLost, firstClick, numberOfMines, numberOfFlags, rows, columns;
+var board,
+    allCells,
+    boardHtml,
+    gameLost,
+    firstClick,
+    numberOfMines,
+    numberOfFlags,
+    rows,
+    columns,
+    mouseDown,
+    currentElem;
 
 beginner.addEventListener("click", function () {
     startGame(9, 9, 10);
@@ -28,7 +38,6 @@ expert.addEventListener("click", function () {
     startGame(16, 30, 99);
 });
 
-
 function startGame(r, c, mines) {
     numberOfMines = mines;
     numberOfFlags = mines;
@@ -38,10 +47,29 @@ function startGame(r, c, mines) {
     board = addMinesToRandomSlots(board);
     board = addNeighbourNumbers(board);
     boardHtml = generateBoardHtml(board);
-    console.log('board: ',board);
+    console.log("board: ", board);
     boardElem.innerHTML = boardHtml;
     numberOfFlags = addZerosToNumber(numberOfFlags);
     numberOfFlagsElem.innerHTML = numberOfFlags;
+    allCells = document.querySelectorAll("#board .row div");
+
+    for (var p = 0; p < allCells.length; p++) {
+        allCells[p].addEventListener("mouseenter", function (e) {
+            if (!mouseDown || e.currentTarget.classList.contains("uncovered")) {
+                return;
+            }
+            currentElem = e.target;
+            e.currentTarget.classList.add("active");
+        });
+
+        allCells[p].addEventListener("mouseleave", function (e) {
+            if (!mouseDown || e.currentTarget.classList.contains("uncovered")) {
+                return;
+            }
+            e.currentTarget.classList.remove("active");
+        });
+    }
+
     gameLost = false;
     firstClick = true;
     gameState.innerText = "😊";
@@ -52,6 +80,7 @@ function startGame(r, c, mines) {
 gameState.addEventListener("click", restartGame);
 
 boardElem.addEventListener("contextmenu", function (e) {
+    e.target.classList.remove("active");
     e.preventDefault();
     if (gameLost) {
         return;
@@ -59,15 +88,9 @@ boardElem.addEventListener("contextmenu", function (e) {
     var colIndex = getColIndex(e.target);
     var rowIndex = getRowIndex(e.target);
     if (board[rowIndex][colIndex].state === "covered" && numberOfFlags > 0) {
-        e.target.classList.add("flagged");
-        e.target.innerText = "🏁";
-        board[rowIndex][colIndex].state = "flagged";
-        numberOfFlags--;
+        addFlagToBoard(e.target, colIndex, rowIndex);
     } else if (board[rowIndex][colIndex].state === "flagged") {
-        e.target.classList.remove("flagged");
-        e.target.innerText = "";
-        board[rowIndex][colIndex].state = "covered";
-        numberOfFlags++;
+        removeFlagFromBoard(e.target, colIndex, rowIndex);
     }
     numberOfFlags = addZerosToNumber(numberOfFlags);
     numberOfFlagsElem.innerHTML = numberOfFlags;
@@ -76,34 +99,69 @@ boardElem.addEventListener("contextmenu", function (e) {
     }
 });
 
+function addFlagToBoard(elem, colIndex, rowIndex) {
+    elem.classList.add("flagged");
+    elem.innerText = "🏁";
+    board[rowIndex][colIndex].state = "flagged";
+    numberOfFlags--;
+}
+
+function removeFlagFromBoard(elem, colIndex, rowIndex) {
+    elem.classList.remove("flagged");
+    elem.innerText = "";
+    board[rowIndex][colIndex].state = "covered";
+    numberOfFlags++;
+}
+
+boardElem.addEventListener("mousedown", function (e) {
+    currentElem = e.target;
+    mouseDown = true;
+    if (e.target.classList.contains("uncovered")) {
+        return;
+    }
+    e.target.classList.add("active");
+});
+
+boardElem.addEventListener("mouseup", function (e) {
+    mouseDown = false;
+    rightClicking = false;
+});
+
 boardElem.addEventListener("click", function (e) {
+    mouseDown = false;
     if (gameLost) {
         return;
     }
-    var colIndex = getColIndex(e.target);
-    var rowIndex = getRowIndex(e.target);
+    var colIndex = getColIndex(currentElem);
+    var rowIndex = getRowIndex(currentElem);
     if (board[rowIndex][colIndex].value) {
-        if (firstClick) {
-            swapMineWithBlank(colIndex, rowIndex);
-            uncoverSpace(getCellByRowAndCol(rowIndex, colIndex), rowIndex, colIndex);
-        } else {
-            e.target.classList.add("mine");
-            e.target.innerText = "💣";
-            gameState.innerText = "😞";
-            revealAllMines();
-            gameLost = true;
-        }
+        handleMineClick(colIndex, rowIndex);
     } else {
-        uncoverSpace(e.target, rowIndex, colIndex);
+        uncoverSpace(currentElem, rowIndex, colIndex);
     }
     firstClick = false;
     if (checkForVictory()) {
         console.log("victory!!!");
     }
+    currentElem.classList.remove("active");
 });
 
+function handleMineClick(colIndex, rowIndex) {
+    if (firstClick) {
+        console.log('FIRST CLICK, SWAP MINE');
+        swapMineWithBlank(colIndex, rowIndex);
+        uncoverSpace(getCellByRowAndCol(rowIndex, colIndex), rowIndex, colIndex);
+    } else {
+        currentElem.classList.add("mine");
+        currentElem.innerText = "💣";
+        gameState.innerText = "😞";
+        revealAllMines();
+        gameLost = true;
+    }
+}
+
 function revealAllMines() {
-    var allCells = document.querySelectorAll("#board .row div")
+    var allCells = document.querySelectorAll("#board .row div");
     var mines = board.flat().filter(function (cell) {
         return cell.value;
     });
@@ -146,9 +204,7 @@ function swapMineWithBlank(colIndex, rowIndex) {
     while (!foundNewPlaceForMine) {
         randomRow = Math.floor(Math.random() * rows);
         randomCol = Math.floor(Math.random() * columns);
-        console.log("randomRow, randomCol: ", randomRow, randomCol);
         if (board[randomRow][randomCol].value === 0) {
-            console.log("changing the following to mine", board[randomRow][randomCol]);
             board[randomRow][randomCol].value = 1;
             foundNewPlaceForMine = true;
         }
@@ -318,4 +374,3 @@ function generateBoard(rows, columns) {
     }
     return board;
 }
-

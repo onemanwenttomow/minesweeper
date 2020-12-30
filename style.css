@@ -51,6 +51,10 @@ header {
     align-items: center;
     flex-direction: column;
     min-height: 100vh;
+    -webkit-user-select: none; /* Safari */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+/Edge */
+    user-select: none; /* Standard */
 }
 
 .row {
@@ -72,8 +76,16 @@ header {
     cursor: pointer;
 }
 
+.row div.active {
+    background-color: white;
+    border-right: solid 4px white;
+    border-bottom: solid 4px white;
+    border-top: solid 4px #2e016d;
+    border-left: solid 4px #2e016d;
+}
+
 .row .mine {
-    background-color:#ffadb9;
+    background-color: #ffadb9;
 }
 
 .row .uncovered {
