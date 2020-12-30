@@ -90,6 +90,7 @@ boardElem.addEventListener("click", function (e) {
             e.target.classList.add("mine");
             e.target.innerText = "💣";
             gameState.innerText = "😞";
+            revealAllMines();
             gameLost = true;
         }
     } else {
@@ -100,6 +101,17 @@ boardElem.addEventListener("click", function (e) {
         console.log("victory!!!");
     }
 });
+
+function revealAllMines() {
+    var allCells = document.querySelectorAll("#board .row div")
+    var mines = board.flat().filter(function (cell) {
+        return cell.value;
+    });
+    mines.forEach(function (mine) {
+        allCells[mine.index].classList.add("mine");
+        allCells[mine.index].innerText = "💣";
+    });
+}
 
 function restartGame() {
     numberOfFlags = numberOfMines;
@@ -291,6 +303,7 @@ function generateBoard(rows, columns) {
     for (var row, i = 0; i < rows; i++) {
         row = [];
         for (var j = 0; j < columns; j++) {
+            // 0 no mine, 1 mine
             row.push({
                 state: "covered",
                 value: 0,
