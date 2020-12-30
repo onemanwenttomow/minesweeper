@@ -95,3 +95,11 @@ header {
 .row .flagged {
     background-color: #ffadb9;
 }
+
+.winner {
+    transition: font-size 1s ease-in-out;
+    font-size: 300px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}

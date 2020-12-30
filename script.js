@@ -26,6 +26,11 @@ var board,
     mouseDown,
     currentElem;
 
+// document.addEventListener("keypress", function () {
+//     gameState.classList.add("winner");
+//     gameState.innerText = "🥳";
+// });
+
 beginner.addEventListener("click", function () {
     startGame(9, 9, 10);
 });
@@ -96,6 +101,9 @@ boardElem.addEventListener("contextmenu", function (e) {
     numberOfFlagsElem.innerHTML = numberOfFlags;
     if (checkForVictory()) {
         console.log("victory!!!");
+        console.log('gameState.classList: ',gameState.classList);
+        gameState.classList.add("winner");
+        gameState.innerText = "🥳";
     }
 });
 
@@ -173,6 +181,7 @@ function revealAllMines() {
 
 function restartGame() {
     numberOfFlags = numberOfMines;
+    gameState.classList.remove("winner");
     startGame(rows, columns, numberOfMines);
 }
 
@@ -232,7 +241,9 @@ function uncoverSpace(elem, rowIndex, colIndex) {
                 cell.state = "uncovered";
                 newElem.innerText = cell.numberOfNeighbours;
             } else {
-                uncoverSpace(newElem, cell.row, cell.col);
+                setTimeout(function () { 
+                    uncoverSpace(newElem, cell.row, cell.col);
+                },20)
             }
         });
     }
