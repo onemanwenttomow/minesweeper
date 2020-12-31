@@ -101,7 +101,7 @@ boardElem.addEventListener("contextmenu", function (e) {
     numberOfFlagsElem.innerHTML = numberOfFlags;
     if (checkForVictory()) {
         console.log("victory!!!");
-        console.log('gameState.classList: ',gameState.classList);
+        console.log("gameState.classList: ", gameState.classList);
         gameState.classList.add("winner");
         gameState.innerText = "🥳";
     }
@@ -150,13 +150,15 @@ boardElem.addEventListener("click", function (e) {
     firstClick = false;
     if (checkForVictory()) {
         console.log("victory!!!");
+        gameState.classList.add("winner");
+        gameState.innerText = "🥳";
     }
     currentElem.classList.remove("active");
 });
 
 function handleMineClick(colIndex, rowIndex) {
     if (firstClick) {
-        console.log('FIRST CLICK, SWAP MINE');
+        console.log("FIRST CLICK, SWAP MINE");
         swapMineWithBlank(colIndex, rowIndex);
         uncoverSpace(getCellByRowAndCol(rowIndex, colIndex), rowIndex, colIndex);
     } else {
@@ -241,9 +243,9 @@ function uncoverSpace(elem, rowIndex, colIndex) {
                 cell.state = "uncovered";
                 newElem.innerText = cell.numberOfNeighbours;
             } else {
-                setTimeout(function () { 
+                setTimeout(function () {
                     uncoverSpace(newElem, cell.row, cell.col);
-                },20)
+                }, 20);
             }
         });
     }
