@@ -100,10 +100,7 @@ boardElem.addEventListener("contextmenu", function (e) {
     numberOfFlags = addZerosToNumber(numberOfFlags);
     numberOfFlagsElem.innerHTML = numberOfFlags;
     if (checkForVictory()) {
-        console.log("victory!!!");
-        console.log("gameState.classList: ", gameState.classList);
-        gameState.classList.add("winner");
-        gameState.innerText = "🥳";
+        victoryDance();
     }
 });
 
@@ -149,12 +146,16 @@ boardElem.addEventListener("click", function (e) {
     }
     firstClick = false;
     if (checkForVictory()) {
-        console.log("victory!!!");
-        gameState.classList.add("winner");
-        gameState.innerText = "🥳";
+        victoryDance();
     }
     currentElem.classList.remove("active");
 });
+
+function victoryDance() {
+    console.log("victory!!!");
+    gameState.classList.add("winner");
+    gameState.innerText = "🥳";
+}
 
 function handleMineClick(colIndex, rowIndex) {
     if (firstClick) {
