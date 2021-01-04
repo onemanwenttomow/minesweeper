@@ -26,6 +26,9 @@ var board,
     mouseDown,
     currentElem;
 
+// need to add an event listener for when the left mouse is down, and right mouse clickd
+// it highlights all available spaces
+
 // document.addEventListener("keypress", function () {
 //     gameState.classList.add("winner");
 //     gameState.innerText = "🥳";
